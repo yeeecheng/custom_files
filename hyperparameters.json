@@ -7,10 +7,10 @@
     "exploration_type": "categorical",
     "loss_type": "huber",
     "lr": 0.0003,
-    "num_episodes_between_training": 20,
+    "num_episodes_between_training": 30,
     "num_epochs": 4 , 
     "stack_size": 1,
     "term_cond_avg_score": 350000.0,
     "term_cond_max_episodes": 100000,
-    "sac_alpha": 0.2
+    "sac_alpha": 0.5
   }

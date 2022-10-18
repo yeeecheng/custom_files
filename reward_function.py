@@ -19,55 +19,81 @@ def reward_function(params):
     all_wheels_on_track = params["all_wheels_on_track"]
     waypoints = params["waypoints"]
 
-
-    next_point = waypoints[closest_waypoints[4]]
-    prev_point = waypoints[closest_waypoints[0]]
-    
     reward = 1
-
-    track_direction = math.atan2(next_point[1]-prev_point[1],next_point[0]-prev_point[0])
-    track_direction = math.degrees(track_direction)
     
-    direction_diff = abs(track_direction - heading)
-    
-    if direction_diff < 3:
+    # cur step  11 waypoint 
+    cur_point_end = waypoints[closest_waypoints[10]]
+    cur_point_begin = waypoints[closest_waypoints[0]]
 
-        if  abs(steering_angle) > 2 :
+    # next step    
+    next_point_end = waypoints[closest_waypoints[20]]
+    next_point_begin = waypoints[closest_waypoints[10]]
+    
+    # cal 
+    cur_track_direction = math.atan2(cur_point_end[1]-cur_point_begin[1],cur_point_end[0]-cur_point_begin[0])
+    next_track_direction = math.atan2(next_point_end[1]-next_point_begin[1],next_point_end[0]-next_point_begin[0])
+    
+    # convert angle
+    cur_track_direction = math.degrees(cur_track_direction)
+    next_track_direction = math.degrees(next_track_direction)
+    
+
+    # the angle diff between cur step and next step  
+    next_step_direction_diff = next_track_direction - cur_track_direction 
+    
+    #the angle diff between cur step and car's heading
+    direction_diff = heading - cur_track_direction
+    
+    if abs(next_step_direction_diff) <= 3:
+
+        if abs(direction_diff) <= abs(next_step_direction_diff) :
+
+            if speed < 3.0 :
+                reward += ( speed / 2 )
+            else :
+                reward += ( speed * 2 )
+
+        if abs(steering_angle) > 3 :
+            reward = 1e-3
+        else : 
+            reward += steering_angle*2
+
+    elif next_step_direction_diff <= 20:
+
+        if  next_step_direction_diff >= 0:
             
-            reward  = 1e-3
-        else :
+            if direction_diff >= 0 and direction_diff < next_step_direction_diff/2:
+                
+                remain_angle = (next_step_direction_diff/2 - direction_diff)
+                if steering_angle >= 0 and steering_angle <= remain_angle:
 
-            if speed < 4:
-                reward += (speed/2 * (track_width/2 - distance_from_center))           
-            else:
-                reward += (speed * (track_width/2 - distance_from_center))
+                    if(steering_angle <=  remain_angle / 4 and  speed >=3.0  and speed <= 3.8):
+                        reward += speed
+                    elif (steering_angle <= remain_angle / 2 and speed >=2.0  and speed < 3.0):
+                        reward += speed
+                    elif (steering_angle <= ( 3 * remain_angle / 4 ) and speed >=1.7  and speed < 2.0):
+                        reward += speed 
+                    elif (steering_angle <=  remain_angle and speed >=1.5  and speed < 1.7):
+                        reward += speed
 
-    elif direction_diff < 25:
-        
-        if is_left_of_center and  steering_angle <= 0 and steering_angle >= (2-direction_diff): 
+            elif direction_diff < 0 and direction_diff > next_step_direction_diff/2:
+                
+                remain_angle = (next_step_direction_diff/2 - direction_diff)
 
-            if(steering_angle >= -10 and  speed >= 3.0  and speed <= 3.8):
-                reward += speed
-            elif (steering_angle >= -15 and speed >= 2.0  and speed < 3.0):
-                reward += speed
-            elif (steering_angle >= -20 and speed >= 1.7  and speed < 2.0):
-                reward += speed
-            elif (steering_angle >= -25 and speed >=1.5  and speed < 1.7):
-                reward += speed
+                if steering_angle < 0 and steering_angle > remain_angle :
 
-        elif not is_left_of_center and  steering_angle >=0 and steering_angle <= (direction_diff - 2): 
-            if(steering_angle <= 10 and  speed >=3.0  and speed <= 3.8):
-                reward += speed
-            elif (steering_angle <= 15 and speed >=2.0  and speed < 3.0):
-                reward += speed
-            elif (steering_angle <= 20 and speed >=1.7  and speed < 2.0):
-                reward += speed 
-            elif (steering_angle <= 25 and speed >=1.5  and speed < 1.7):
-                reward += speed
+                    if(steering_angle >= remain_angle / 4 and  speed >= 3.0  and speed <= 3.8):
+                        reward += speed
+                    elif (steering_angle >= remain_angle / 2 and speed >= 2.0  and speed < 3.0):
+                        reward += speed
+                    elif (steering_angle >= ( 3 * remain_angle / 4 ) and speed >= 1.7  and speed < 2.0):
+                        reward += speed
+                    elif (steering_angle >= remain_angle and speed >=1.5  and speed < 1.7):
+                        reward += speed
+
 
     if is_offtrack:
         reward = 1e-3
                         
-
 
     return float(reward)
