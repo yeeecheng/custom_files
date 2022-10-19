@@ -22,12 +22,12 @@ def reward_function(params):
     reward = 1
     
     # cur step  11 waypoint 
-    cur_point_end = waypoints[closest_waypoints[10]]
+    cur_point_end = waypoints[closest_waypoints[1]]
     cur_point_begin = waypoints[closest_waypoints[0]]
 
     # next step    
-    next_point_end = waypoints[closest_waypoints[20]]
-    next_point_begin = waypoints[closest_waypoints[10]]
+    next_point_end = waypoints[closest_waypoints[2]]
+    next_point_begin = waypoints[closest_waypoints[1]]
     
     # cal 
     cur_track_direction = math.atan2(cur_point_end[1]-cur_point_begin[1],cur_point_end[0]-cur_point_begin[0])
@@ -49,7 +49,7 @@ def reward_function(params):
         if abs(direction_diff) <= abs(next_step_direction_diff) :
 
             if speed < 3.0 :
-                reward += ( speed / 2 )
+                reward += ( speed )
             else :
                 reward += ( speed * 2 )
 
